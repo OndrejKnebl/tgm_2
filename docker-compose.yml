@@ -1,0 +1,51 @@
+# docker-compose.yml
+version: '3.8'
+services:
+  influxdb2:
+    image: influxdb:2.7
+    container_name: influxdb2
+    ports:
+      - "8086:8086"
+    volumes:
+      - influxdb2:/var/lib/influxdb2
+      - influxdb2:/etc/influxdb2
+    networks:
+      - myNetworkIandG
+      - myNetworkIandM
+    restart: always
+
+  tgm_2:
+    build: .
+    container_name: tgm_2
+    environment:
+      TTN_PERSONAL_API_KEY: NNSXS.AB...                             # Enter your personal API key from TTN here
+      TTN_URL: https://eu1.cloud.thethings.network                  # TTN cluster
+      COLLECTION_INTERVAL: 300                                      # TTN data collection interval in seconds
+      DB_URL: http://influxdb2:8086
+      DB_WRITE_TOKEN: AAA                                           # Enter the write token created in InfluxDB
+      DB_ORG: BBB                                                   # Enter the name of the organization created in InfluxDB
+      DB_BUCKET: CCC                                                # Enter the name of the bucket created in InfluxDB
+    networks:
+      - myNetworkIandM
+    restart: always
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    networks:
+      - myNetworkIandG
+    restart: always
+
+networks:
+  myNetworkIandG:
+    external: false
+  myNetworkIandM:
+    external: false
+
+volumes:
+  influxdb2:
+  grafana_data:
